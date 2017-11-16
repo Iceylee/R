@@ -40,9 +40,9 @@ info_go_MF <- enrichGO(gene = gene_id,
                        qvalueCutoff = 0.05)
 
 #output table
-write.table(as.data.frame(info_go_BP@result), file="GO_BP_out.txt")
-write.table(as.data.frame(info_go_CC@result), file="GO_CC_out.txt")
-write.table(as.data.frame(info_go_MF@result), file="GO_MF_out.txt")
+write.table(as.data.frame(info_go_BP@result), file="GO_BP_out.txt",quote=F,row.names = F)
+write.table(as.data.frame(info_go_CC@result), file="GO_CC_out.txt",quote=F,row.names = F)
+write.table(as.data.frame(info_go_MF@result), file="GO_MF_out.txt",quote=F,row.names = F)
 
 #get gene sum number
 tep_num1 = as.data.frame(ego_CC)[1,3]
