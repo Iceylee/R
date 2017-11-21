@@ -9,6 +9,7 @@ gene_id <- as.character(gene_lists[,1])
 
 #ids <- bitr(x, fromType="SYMBOL", toType=c("UNIPROT", "ENSEMBL"), OrgDb="org.Hs.eg.db")
 #head(ids)
+##NEED SYMBOL 
 
 kk <- enrichKEGG(gene = gene_id, organism = "vda", keyType = "kegg", pvalueCutoff = 0.05)
 

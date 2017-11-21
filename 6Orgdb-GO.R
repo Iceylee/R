@@ -13,8 +13,8 @@ columns(maize)
 keys(maize)[1:100]
 
 
-gene_list <- read.csv("swissprot-trezID.txt", sep = '\t',header = F)
-gene_id <- gene_list$V1
+gene_list <- read.csv("swissprot-trezID.txt", sep = '\t',header = F,stringsAsFactors=F)
+gene_id <- gene_list[,3]
 
 ##enrichGO
 info_go_BP <- enrichGO(gene = gene_id, 
@@ -44,23 +44,23 @@ write.table(as.data.frame(info_go_BP@result), file="GO_BP_out.txt",quote=F,row.n
 write.table(as.data.frame(info_go_CC@result), file="GO_CC_out.txt",quote=F,row.names = F)
 write.table(as.data.frame(info_go_MF@result), file="GO_MF_out.txt",quote=F,row.names = F)
 
-#get gene sum number
-tep_num1 = as.data.frame(ego_CC)[1,3]
-tep_num2 = strsplit(tep_num1 , "/")
-gene_num_CC = as.numeric(tep_num2[[1]][2])
-
-tep_num1 = as.data.frame(ego_MF)[1,3]
-tep_num2 = strsplit(tep_num1 , "/")
-gene_num_MF = as.numeric(tep_num2[[1]][2])
-
-tep_num1 = as.data.frame(ego_BP)[1,3]
-tep_num2 = strsplit(tep_num1 , "/")
-gene_num_BP = as.numeric(tep_num2[[1]][2])
-
-
 ego_CC <- as.data.frame(info_go_CC)
 ego_BP <- as.data.frame(info_go_BP)
 ego_MF <- as.data.frame(info_go_MF)
+
+#get gene sum number
+tep_num1 = ego_CC[1,3]
+tep_num2 = strsplit(tep_num1 , "/")
+gene_num_CC = as.numeric(tep_num2[[1]][2])
+
+tep_num1 = ego_MF[1,3]
+tep_num2 = strsplit(tep_num1 , "/")
+gene_num_MF = as.numeric(tep_num2[[1]][2])
+
+tep_num1 = ego_BP[1,3]
+tep_num2 = strsplit(tep_num1 , "/")
+gene_num_BP = as.numeric(tep_num2[[1]][2])
+
 
 
 #p value top 15 select
@@ -77,6 +77,7 @@ ego_MF_df <- as.data.frame(info_go_MF)[1:10, c(2:3, 9)] %>%
 ##bind three onco
 ego_three <- rbind(ego_CC_df, ego_BP_df, ego_MF_df)
 View(ego_three)
+
 ##plot bar
 #########NEED CHANGE limits
 library(ggplot2)
