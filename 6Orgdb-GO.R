@@ -1,3 +1,9 @@
+#update
+# source("http://www.bioconductor.org/biocLite.R")
+# biocLite("BiocUpgrade")
+# biocLite()
+
+
 library(clusterProfiler)
 library(DOSE)
 
@@ -19,30 +25,30 @@ gene_id <- gene_list[,3]
 ##enrichGO
 info_go_BP <- enrichGO(gene = gene_id, 
                        OrgDb = maize, 
-                       keytype = "ENTREZID", 
+                       keyType = "ENTREZID", 
                        ont = "BP", 
                        pAdjustMethod = "BH", 
                        pvalueCutoff = 0.05, 
                        qvalueCutoff = 0.05)
 info_go_CC <- enrichGO(gene = gene_id, 
                        OrgDb = maize, 
-                       keytype = "ENTREZID", 
+                       keyType = "ENTREZID", 
                        ont = "CC", 
                        pAdjustMethod = "BH", 
                        pvalueCutoff = 0.05, 
                        qvalueCutoff = 0.05)
 info_go_MF <- enrichGO(gene = gene_id, 
                        OrgDb = maize, 
-                       keytype = "ENTREZID", 
+                       keyType = "ENTREZID", 
                        ont = "MF", 
                        pAdjustMethod = "BH", 
                        pvalueCutoff = 0.05, 
                        qvalueCutoff = 0.05)
 
 #output table
-write.table(as.data.frame(info_go_BP@result), file="GO_BP_out.txt",quote=F,row.names = F)
-write.table(as.data.frame(info_go_CC@result), file="GO_CC_out.txt",quote=F,row.names = F)
-write.table(as.data.frame(info_go_MF@result), file="GO_MF_out.txt",quote=F,row.names = F)
+write.table(as.data.frame(info_go_BP@result), file="GO_BP_out.txt",quote=F,row.names = F,sep = "\t")
+write.table(as.data.frame(info_go_CC@result), file="GO_CC_out.txt",quote=F,row.names = F,sep = "\t")
+write.table(as.data.frame(info_go_MF@result), file="GO_MF_out.txt",quote=F,row.names = F,sep = "\t")
 
 ego_CC <- as.data.frame(info_go_CC)
 ego_BP <- as.data.frame(info_go_BP)
@@ -85,8 +91,8 @@ p <- ggplot(ego_three, aes(y = GeneRatio, x = Description)) +
   geom_bar(stat = "identity", aes(fill = onco), alpha = 0.7) +
   facet_grid(onco ~ ., scales = "free", space = "free") +
   coord_flip()  +
-  scale_y_continuous(limits = c(0, 70))+
-  scale_fill_discrete(name = "Ontology", labels = c("Biological process", "Molecular function", "Cellular component")) +
+  #scale_y_continuous(limits = c(0, 70))+
+  scale_fill_discrete(name = "Ontology", labels = c("Cellular component","Biological process", "Molecular function")) +
   theme_light() +
   theme(axis.text = element_text(size = 6, face = "bold"), legend.text = element_text(size = 6, face = "bold")) +
   labs(y = "Percentage of Genes", x = "Term")
@@ -94,3 +100,5 @@ p <- ggplot(ego_three, aes(y = GeneRatio, x = Description)) +
 pdf(file="GO_barplot.pdf")
 p
 dev.off()
+
+#ggsave("COG.pdf",p, width=7, height=7, units="in")
