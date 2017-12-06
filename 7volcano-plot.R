@@ -18,7 +18,7 @@ color<- c(red = "red", gray = "gray", blue ="blue")
 sig_df$color <- ifelse(sig_df$padj < 0.05 & abs(sig_df$log2FoldChange) >=1,ifelse(sig_df$log2FoldChange > 1 ,'red','blue'),'gray')
 
 
-
+library(ggplot2)
 p <- ggplot(sig_df, aes(x = log2FoldChange, y = -log10(padj),col = color)) +
   geom_point() +
   scale_color_manual(values = color) +

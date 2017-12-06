@@ -10,3 +10,16 @@ go_id_top <- go_id %>%
 levels(go_id$class)[levels(go_id$class)=="C"]<- "CC"
 levels(go_id$class)[levels(go_id$class)=="F"]<- "MF"
 levels(go_id$class)[levels(go_id$class)=="P"]<- "BP"
+
+ids_du <- ids[!duplicated(ids$UNIGENE),]
+
+
+
+conda install r
+conda install -y bioconductor-deseq bioconductor-deseq2 bioconductor-edger r-gplots
+
+
+source("http://bioconductor.org/biocLite.R")
+biocLite("DESeq")
+biocLite("DESeq2")
+biocLite("edgeR")

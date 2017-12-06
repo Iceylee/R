@@ -7,12 +7,13 @@ result <- genome.list
 #View(genome.list)
 colnames(result) <- "Gene_ID"
 
+#"ardb","phi","vfdb","cazy"
 anno_list = c("cog","go","kegg","nr","pfam","swissprot","trembl")
 
 
 for (i in anno_list){
   filename = paste(i,".anno.out", sep="")
-  outfilename = paste("out/",i,".annotation.csv",sep="")
+  outfilename = paste("out/",i,".annotation.txt",sep="")
   df = read.table(file = filename, sep = "\t", header=F,stringsAsFactors = F,quote="")
   
   if (i == "go" || i == "kegg"){
@@ -23,9 +24,12 @@ for (i in anno_list){
     colnames(df) <- c("Gene_ID",paste(i,"_ID",sep=""),"Identity","Align_Length","Mismatch","Gap","Q_start","Q_end", "T_start", "T_end", "E_value", "Score", "Function")
     gene_func<- select(df,Gene_ID,Function)
   }
-  write.csv(df,file = outfilename,row.names = F,quote = F)
+  df <- df[!df[,2]==" ",]
+  write.table(df,file = outfilename,sep = "\t",row.names = F,quote = F)
   result <- left_join(result,gene_func,by = "Gene_ID") 
 }
 
-colnames(result) <- c("transcript_ID","cog","go","kegg","nr","pfam","swissprot","trembl")
-write.table(result,file="out/result.txt",na="",row.names = F,quote = F,sep = "\t")
+result[result==" "] <- "-"
+
+colnames(result) <- c("Transcript_ID","COG","GO","KEGG","NR","Pfam","SwissProt","TrEMBL")
+write.table(result,file="out/summary.txt",na="",row.names = F,quote = F,sep = "\t")
