@@ -40,3 +40,25 @@ p+theme(axis.text = element_text(size = 8，face="bold"), legend.text = element_
 ##如何让表格显示的顺序是BP CC MF呢（level需要修改）
 ego_three$term<- factor(ego_three$term, order=TRUE, levels=rev(ego_three$term))
 # ego_three$class<- factor(ego_three$class, order=TRUE, levels=c("MF","CC","BP"))
+
+
+
+#分开string并计数
+p = c('a|b|c|d','b|c|c','x|y')
+pp = strsplit(as.character(p),'|',fixed=TRUE)
+count = unlist(lapply(pp,length))
+
+
+##分栏
+#1.
+p = c('a|b|','b|c','x|y')
+pp = strsplit(as.character(p),'|',fixed=TRUE)
+ppp = do.call('rbind',pp ) #function name; a list -output a list 函数只能接受两个参数，list中上一个和当前。
+foo <- data.frame()
+#2.
+within(df, FOO<-data.frame(do.call('rbind', strsplit(as.character(FOO), '|', fixed=TRUE))))
+#3.
+require(reshape)
+df <- data.frame(ID=11:13, FOO=c('a|b','b|c','x|y'))
+df = transform(df, FOO = colsplit(FOO, split = "\\|", names = c('a', 'b')))
+
