@@ -25,3 +25,5 @@ write.table(kk_df, file="KEGG_out.txt",quote = F,sep = "\t")
 pdf(file="KEGG_dotplot.pdf")
 dotplot(kk)
 dev.off()
+
+

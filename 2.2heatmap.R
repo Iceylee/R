@@ -2,6 +2,40 @@ library(dplyr)
 library(pheatmap)
 setwd("~/work/11月/1121cuffdiff/")
 
+#1. deseq2 raw count 
+###dds 未标准化
+load(file = "1Data_Input.RData")
+
+rld <- rlog(dds, blind = FALSE)
+#######前20样本差异较大的，做聚类热图。不同样本中的表达情况
+library("genefilter") 
+library("pheatmap")
+
+topVarGenes <- head(order(rowVars(assay(rld)), decreasing = TRUE), 30) 
+mat  <- assay(rld)[ topVarGenes, ] 
+mat  <- mat - rowMeans(mat) 
+
+#从coldata导入condition信息
+# coldata_file = "colData.csv"
+# colData = read.csv(coldata_file, header=T, sep="\t", row.names=1 )
+# anno = data.frame(Condition = colData$condition)
+
+#手动写condition信息
+anno = data.frame(Condition = c("BZ", "BZ", "V199", "V199"))
+
+anno$Condition = as.factor(anno$Condition)
+
+rownames(anno) = rownames(colData)
+
+pdf(file="heatmap_top30.pdf")
+#cluster_cols=F
+pheatmap(mat,annotation_col = anno)
+dev.off()
+
+
+
+###2.fpkm做热图
+
 fpkm_data <- read.table(file = "Cuffdiff/genes.fpkm_tracking", header=TRUE, sep="\t", stringsAsFactors = F)
 
 fpkm_data2 <- select(fpkm_data,Pal_12dpi_FPKM,Pal.103_12dpi_FPKM,gene_short_name)

@@ -3,6 +3,19 @@
 # biocLite("BiocUpgrade")
 # biocLite()
 
+#模式生物
+#Zebrafish
+# library(org.Dr.eg.db)
+#mouse
+# source("https://bioconductor.org/biocLite.R")
+# biocLite("org.Mm.eg.db")
+# library(org.Mm.eg.db)  
+#human
+#library(org.Hs.eg.db)
+
+
+library(clusterProfiler)
+library(DOSE)
 
 rm=list(ls())
 
@@ -51,3 +64,5 @@ info_go_MF <- enrichGO(gene = gene_id,
 write.table(as.data.frame(info_go_BP@result), file="GO_BP_out.txt",quote=F,row.names = F,sep = "\t")
 write.table(as.data.frame(info_go_CC@result), file="GO_CC_out.txt",quote=F,row.names = F,sep = "\t")
 write.table(as.data.frame(info_go_MF@result), file="GO_MF_out.txt",quote=F,row.names = F,sep = "\t")
+
+dbDisconnect() 

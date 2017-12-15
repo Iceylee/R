@@ -54,11 +54,37 @@ count = unlist(lapply(pp,length))
 p = c('a|b|','b|c','x|y')
 pp = strsplit(as.character(p),'|',fixed=TRUE)
 ppp = do.call('rbind',pp ) #function name; a list -output a list 函数只能接受两个参数，list中上一个和当前。
-foo <- data.frame()
+foo <- data.frame(ppp)
 #2.
 within(df, FOO<-data.frame(do.call('rbind', strsplit(as.character(FOO), '|', fixed=TRUE))))
 #3.
 require(reshape)
 df <- data.frame(ID=11:13, FOO=c('a|b','b|c','x|y'))
 df = transform(df, FOO = colsplit(FOO, split = "\\|", names = c('a', 'b')))
+
+#
+#引号中为一个object，该object是否存在
+exists("ego_CC_df")
+
+
+###研究
+#诉求：三个df，检测是否存在。rbind合并存在的几个df
+#ego_list <- list(BP=ego_BP_df,CC=ego_BP_CC,MF=ego_BP_MF)
+ego_list <- c("ego_BP_df", "ego_MF_df", "ego_CC_df")
+TorF <- sapply(ego_list,exists)
+real_list <- sapply(ego_list[TorF],as.name)
+ppp = do.call('rbind',real_list )
+
+
+##remove colon:
+gene_id <- sapply(gene_id,function (x) {unlist(strsplit(x,split=":"))[2]})
+
+
+##变量1转列名 变量2转行名 统计变量3
+library(reshape2)
+rpkm_df <- read.table(file = "AllSamplesRPKMValue.txt",sep = '\t',header =F,stringsAsFactors=F)
+dff <- rpkm_df[,1:3] #只能有三列
+rpkm_tab <- dcast(dff, V2 ~ V1) #V2为左侧列 V1为最上的行
+#转回去是melt和cast
+
 
