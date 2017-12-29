@@ -87,4 +87,78 @@ dff <- rpkm_df[,1:3] #只能有三列
 rpkm_tab <- dcast(dff, V2 ~ V1) #V2为左侧列 V1为最上的行
 #转回去是melt和cast
 
+rep(seq(1, 7, by = 2), times = 7)
 
+#正则
+# The emails vector has already been defined for you
+emails <- c("john.doe@ivyleague.edu", "education@world.gov", "dalai.lama@peace.org",
+            "invalid.edu", "quant@bigdatacollege.edu", "cookie.monster@sesame.tv")
+# Use grepl() to match for "edu"   [1]  TRUE  TRUE FALSE  TRUE  TRUE FALSE
+grepl("edu",emails)
+# Use grep() to match for "edu", save result to hits  [1] 1 2 4 5
+grep("edu",emails)   
+# Subset emails using hits
+emails[grepl("edu",emails)]
+emails[grep("edu",emails)]
+#匹配@
+#匹配任何字符多次 .*
+#反义圆点 \\
+grepl("@.*\\.edu$",emails)
+# Use sub() to convert the email domains to datacamp.edu
+sub("@.*\\.edu$","@datacamp.edu",emails)
+
+#报错的情况赋值
+qobj <- tryCatch(qvalue(p=Over$pvalue, lambda=0.05, pi0.method="bootstrap"), error=function(e) NULL)
+
+# Print the R version details using version
+version
+# Assign the variable `major` to the major component
+major <-  version$major
+# Assign the variable `minor` to the minor component
+minor <- version$minor
+
+# How long does it take to read movies from CSV?
+system.time(read.csv("movies.csv"))
+# How long does it take to read movies from RDS?
+system.time(readRDS("movies.rds"))
+#等号和箭头的区别 在函数内部使用箭头，变量也被赋值。 
+median(x <- 1:10); x
+#比较函数运行的时间
+# Load the microbenchmark package
+library(microbenchmark)
+# Compare the two functions，10即各运行10次
+compare <- microbenchmark(read.csv("movies.csv"), 
+                          readRDS("movies.rds"), 
+                          times = 10)
+# Print compare
+print(compare)
+
+##function
+#for循环不好 如果df是空 将会报错
+df <- data.frame()
+1:ncol(df)
+
+for (i in 1:ncol(df)) {
+  print(median(df[[i]]))
+}
+##用seq_along
+for (i in seq_along(df)) {
+  print(median(df[[i]]))
+}
+##将df的结果存在output里面
+# Create new double vector: output
+output = vector("double", length = ncol(df))
+#
+for (i in seq_along(df)) {
+  output[[i]] = median(df[[i]])
+}
+# Print output
+print (output)
+
+##
+# Define example vectors x and y
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3,  4)
+# Count how many elements are missing in both x and y
+# x和y都是NA的，计1.sum求这样的个数
+sum(is.na(x) & is.na(y))
