@@ -1,6 +1,6 @@
 setwd("~/work/11月/1128cog_plot/")
 library(dplyr)
-cog.count = read.table(file = "count.fun.id", sep = "\t", header = F, stringsAsFactors = F)
+cog.count = read.table(file = "cog_count_fun.id", sep = "\t", header = F, stringsAsFactors = F)
 
 #移除第三列是”“（不是NA）的行
 cog.count2 <- cog.count[!cog.count$V3 == "",] %>%

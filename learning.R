@@ -162,3 +162,6 @@ y <- c(NA, 3, NA, 3,  4)
 # Count how many elements are missing in both x and y
 # x和y都是NA的，计1.sum求这样的个数
 sum(is.na(x) & is.na(y))
+
+rep
+seq

@@ -10,7 +10,7 @@ result <- genome.list
 #View(genome.list)
 colnames(result) <- "Gene_ID"
 
-anno_list = c("cog","go","kegg","nr","pfam","swissprot","trembl")
+anno_list = c("cog","go","kegg","nr","pfam","sp","trembl")
 ANNO_list = c("COG","GO","KEGG","NR","Pfam","SwissProt","TrEMBL")
 
 for (index in c(rep(1:7))){
