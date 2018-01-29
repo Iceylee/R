@@ -1,4 +1,5 @@
-setwd("~/work/11月/1128cog_plot/")
+
+
 library(dplyr)
 cog.count = read.table(file = "cog_count_fun.id", sep = "\t", header = F, stringsAsFactors = F)
 
@@ -39,6 +40,6 @@ p <- ggplot(cog.count2,aes(x = class, y = count)) +
 p
 
 #存储pdf的大小
-ggsave("COG.pdf",p, width=7, height=7, units="in")
+ggsave("COG_barplot.pdf",p, width=7, height=7, units="in")
 
 

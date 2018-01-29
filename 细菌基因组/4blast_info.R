@@ -1,8 +1,8 @@
-setwd("~/work/11月/1113blast/")
+setwd("/Users/Icey/work/2018/0105_852Brevibacillus唐兵/original/3功能分析/result/")
 library(dplyr)
 
 dir.create("out/")
-genome.list = read.table(file="sorted.genome.list", header=F,stringsAsFactors = F)
+genome.list = read.table(file="genome.list", header=F,stringsAsFactors = F)
 
 
 #1.Function Result
@@ -45,7 +45,7 @@ for (index in c(rep(1:7))){
 result[is.na(result)] <- "-"
 
 colnames(result) <- c("Gene_ID","COG","GO","KEGG","NR","Pfam","SwissProt","TrEMBL")
-write.table(result,file="out/summary.txt",na="",row.names = F,quote = F,sep = "\t")
+write.table(result,file="out/Annotation_Summary.txt",na="",row.names = F,quote = F,sep = "\t")
 
 
 #2.Pathogen Result
