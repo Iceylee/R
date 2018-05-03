@@ -58,7 +58,7 @@ result_q_top_log <- log10(result_q_top + 1)
 
 
 #添加了legend的标题 log10(FPKM+1)
-pdf(file="heatmap_top30.pdf")
+pdf(file="heatmap_top30.pdf",onefile=FALSE))
 pheatmap(result_q_top_log,scale="column", legend_breaks = c(0, 1, 2,max(result_q_top_log)),legend_labels = c("0", "1", "2","log10(FPKM+1)\n"),
          legend = TRUE)
 dev.off()

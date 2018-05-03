@@ -7,7 +7,7 @@ enricher_internal <- function(gene,
                               qvalueCutoff=0.2,
                               USER_DATA){
 
-    ## query external ID to Term ID ä»Žå¤–éƒ¨IDåˆ°GO ID
+    ## query external ID to Term ID ´ÓÍâ²¿IDµ½GO ID
     gene <- as.character(unique(gene))
     qExtID2TermID <- EXTID2TERMID(gene, USER_DATA)
     qTermID <- unlist(qExtID2TermID)
@@ -32,16 +32,16 @@ enricher_internal <- function(gene,
     qTermID2ExtID <- with(qExtID2TermID.df,
                           split(as.character(extID), as.character(termID)))
 
-    extID <- ALLEXTID(USER_DATA) #OrgDbå¯¼å‡ºçš„æ‰€æœ‰æ³¨é‡ŠCCçš„geneID
+    extID <- ALLEXTID(USER_DATA) #OrgDbµ¼³öµÄËùÓÐ×¢ÊÍCCµÄgeneID
     if (missing(universe))
         universe <- NULL
     if(!is.null(universe)) {
         extID <- intersect(extID, universe) 
-        # æ±‚extIDå’Œuniverseçš„äº¤é›†ï¼›å³åªç”¨universeä¸­çš„åŸºå› ï¼ˆuniverseæ˜¯æ¯”OrgDbè¦å°çš„ï¼‰
+        # ÇóextIDºÍuniverseµÄ½»¼¯£»¼´Ö»ÓÃuniverseÖÐµÄ»ùÒò£¨universeÊÇ±ÈOrgDbÒªÐ¡µÄ£©
     }
 
     qTermID2ExtID <- lapply(qTermID2ExtID, intersect, extID) 
-    # æ±‚å·²ç»æ³¨é‡Šè¿‡çš„åŸºå› å’ŒextIDçš„äº¤é›†
+    # ÇóÒÑ¾­×¢ÊÍ¹ýµÄ»ùÒòºÍextIDµÄ½»¼¯
 
     ## Term ID annotate query external ID
     qTermID <- unique(names(qTermID2ExtID))
