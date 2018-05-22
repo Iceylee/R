@@ -35,7 +35,7 @@ sig_df <- filter(df,!is.na(padj))
 #scale_color_manual 
 color<- c(red = "red", gray = "gray", blue ="blue")
 #add color column ,and condition
-sig_df$color <- ifelse(sig_df$padj < 0.05 & abs(sig_df$log2FoldChange) >=1,ifelse(sig_df$log2FoldChange > 1 ,'red','blue'),'gray')
+sig_df$color <- ifelse(sig_df$padj < 0.05 & abs(sig_df$log2FoldChange) >=1,ifelse(sig_df$log2FoldChange >= 1 ,'red','blue'),'gray')
 ##
 library(ggplot2)
 rm(p)

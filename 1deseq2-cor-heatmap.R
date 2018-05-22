@@ -7,11 +7,11 @@
 library(DESeq2)
 library(dplyr)
 
-countData = read.table(count_table, header=TRUE, sep=",", row.names=2)
-countData = countData[,-1] #delete first column(entrezID)
-colData = read.csv(coldata_file, header=T)
+countData = read.table(count_table, header=TRUE, sep=",", row.names=1)
+#countData = countData[,-1] #delete first column(entrezID)
+colData = read.csv(coldata_file, header=T,row.names=1)
 colData$condition = as.factor(colData$condition)
-colnames(countData) <- colData[,1]
+colnames(countData) <- rownames(colData)
 #all(rownames(colData) %in% colnames(countData))
 
 # Create DESEq2 dataset.
@@ -58,7 +58,8 @@ mat  <- assay(rld)[ topVarGenes, ]
 mat  <- mat - rowMeans(mat) 
 anno = data.frame(Condition = colData$condition)
 anno$Condition = as.factor(anno$Condition)
-rownames(anno) = colData$Sample
+#rownames(anno) = colData$Sample
+rownames(anno) = rownames(colData)
 pdf(file=paste(path1,"heatmap_top30.pdf",sep="/"),onefile=FALSE)
 #cluster_cols = F
 pheatmap(mat,annotation_col = anno)
