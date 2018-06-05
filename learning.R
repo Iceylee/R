@@ -1,3 +1,54 @@
+#批量读入文件 
+a = list.files("./rawData")                                                       
+dir = paste("./rawData/",a,sep="")                                      
+n = length(dir)                                                                 
+result = read.csv(file = dir[1],header=T,sep="\t",stringsAsFactors=F)   #读入第一个文件内容
+
+for (i in 2:n){
+  new.data = read.csv(file = dir[i], header=T, sep="\t",stringsAsFactors=F)
+  
+  result = left_join(result,new.data,by="geneID")
+}
+
+write.table(result,"count.txt" ,row.names = F,quote = F,sep="\t")
+
+
+#substring
+string = c("G1:E001", "G2:E002", G3:E003)
+
+1) sub
+
+sub(".*:", "", string)
+## [1] "E001" "E002" "E003"
+2) strsplit
+
+sapply(strsplit(string, ":"), "[", 2)
+## [1] "E001" "E002" "E003"
+3) read.table
+
+read.table(text = string, sep = ":", as.is = TRUE)$V2
+## [1] "E001" "E002" "E003"
+4) substring
+
+This assumes second portion always starts at 4th character (which is the case in the example in the question):
+
+substring(string, 4)
+## [1] "E001" "E002" "E003"
+4a) substring/regex
+
+If the colon were not always in a known position we could modify (4) by searching for it:
+
+substring(string, regexpr(":", string) + 1)
+5) strapplyc
+
+strapplyc returns the parenthesized portion:
+
+library(gsubfn)
+strapplyc(string, ":(.*)", simplify = TRUE)
+## [1] "E001" "E002" "E003"
+
+
+
 #得到class中每组的count的前10
 
 go_id_top <- go_id %>%
