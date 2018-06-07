@@ -7,6 +7,10 @@ hub <- AnnotationHub()
 # library(org.Hs.eg.db)
 # db <- org.Hs.eg.db
 #   2. download
+
+org <- ah[ah$rdataclass == "OrgDb",]
+hm <- query(org, "Homo sapiens")
+
 query(hub, "Verticillium dahliae")
 db <- hub[['AH59553']]
 

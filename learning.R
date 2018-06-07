@@ -12,6 +12,17 @@ for (i in 2:n){
 
 write.table(result,"count.txt" ,row.names = F,quote = F,sep="\t")
 
+#匹配部分文件
+
+path1 = paste(output_path,"3.DiffExprGene",sep="")
+sigfiles = list.files(path1,pattern="sig_genes_exprData.txt")
+
+#函数 多参数
+sapply(sigfiles,GOKEGG,pSet=0.05)
+sapply(sigfiles,GOKEGG,pSet=1)
+
+#bash
+system("ls")
 
 #substring
 string = c("G1:E001", "G2:E002", G3:E003)

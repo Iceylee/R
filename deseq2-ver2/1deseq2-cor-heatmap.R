@@ -4,15 +4,19 @@
 #####################1.deseq2-normalize#################
 ########################################################
 # Load the library.
-library(DESeq2)
-library(dplyr)
+suppressMessages(library(DESeq2))
+suppressMessages(library(dplyr))
 
 countData = read.table(count_table, header=TRUE, sep=",", row.names=1)
 #countData = countData[,-1] #delete first column(entrezID)
 colData = read.csv(coldata_file, header=T,row.names = 1)
 colData$condition = as.factor(colData$condition)
-colnames(countData) <- colData[,1]
-#all(rownames(colData) %in% colnames(countData))
+#colnames(countData) <- colData[,1]
+if (all(rownames(colData) %in% colnames(countData)) == F) {
+  print ("rownames(colData) != colnames(countData)")
+  print ("Please check.")
+  stop(call.=FALSE)
+}
 
 # Create DESEq2 dataset.
 dds = DESeqDataSetFromMatrix(countData=countData, colData=colData, design = ~condition) #~在R里面用于构建公式对象，~左边为因变量，右边为自变量。
@@ -43,7 +47,7 @@ cor.df <- cor(df[,unlist(lapply(df, is.numeric))])
 
 library(pheatmap)
 pdf(file=paste(path3,"heatmap_cor.pdf",sep="/"),onefile=FALSE)
-pheatmap(cor.df,legend = TRUE,display_numbers = TRUE, number_format = "%.2f", number_color="black")
+pheatmap(cor.df,legend = TRUE,display_numbers = TRUE, number_format = "%.2f", number_color="black",cluster_cols = FALSE)
 dev.off()
 
 ########################################################

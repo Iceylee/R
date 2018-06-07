@@ -1,5 +1,5 @@
-library(dplyr)
-library(DESeq2)
+suppressMessages(library(dplyr))
+suppressMessages(library(DESeq2))
 
 ########################################################
 #####################4.deseq2-diff-gene#################
