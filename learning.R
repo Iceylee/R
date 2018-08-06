@@ -1,3 +1,9 @@
+#string 传为object
+Plot_Rank = "Phylum"
+arrange(df,!!sym(Plot_Rank))
+#等同于
+arrange(df,Phylum)
+
 #批量读入文件 
 a = list.files("./rawData")                                                       
 dir = paste("./rawData/",a,sep="")                                      

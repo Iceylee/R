@@ -20,8 +20,9 @@ output_path <- args[5] #"./"
 suppressMessages(library(clusterProfiler))
 suppressMessages(library(DOSE))
 suppressMessages(library(dplyr))
-suppressMessages(require(AnnotationHub))
+suppressMessages(library(AnnotationHub))
 suppressMessages(library(tidyr))
+suppressMessages(library(ggplot2))
 
 GOKEGG <- function(file,pSet)  {
   path3 = paste(output_path,"4.GO_KEGG/",pSet,"/",sep="")
@@ -29,6 +30,13 @@ GOKEGG <- function(file,pSet)  {
   
   sig_path = paste(path1,"/",file,sep="")
   gene_list <- read.csv(sig_path, sep = '\t',header = T,stringsAsFactors=F)
+
+  #if first col type: geneID(geneSymbol)
+  #extract symbol in parentesis
+  if (grepl("\\(",gene_list[2,1])){
+    gene_list[,1] <- sapply(gene_list[,1],function(string){regmatches(string, gregexpr("(?<=\\().*?(?=\\))", string, perl=T))[[1]]})
+  }
+
   groups = sapply(strsplit(file, "_"), "[", 1)
     
   gene_id = as.character(gene_list[,1])
@@ -45,21 +53,24 @@ GOKEGG <- function(file,pSet)  {
                          ont = "BP", 
                          pAdjustMethod = "BH", 
                          pvalueCutoff = pSet, 
-                         qvalueCutoff = pSet)
+                         qvalueCutoff = pSet,
+                         minGSSize = 1)
   info_go_CC <- enrichGO(gene = gene_id, 
                          OrgDb = db, 
                          keyType = GO_KEY, 
                          ont = "CC", 
                          pAdjustMethod = "BH", 
                          pvalueCutoff = pSet, 
-                         qvalueCutoff = pSet)
+                         qvalueCutoff = pSet,
+                         minGSSize = 1)
   info_go_MF <- enrichGO(gene = gene_id, 
                          OrgDb = db, 
                          keyType = GO_KEY, 
                          ont = "MF", 
                          pAdjustMethod = "BH", 
                          pvalueCutoff = pSet, 
-                         qvalueCutoff = pSet)
+                         qvalueCutoff = pSet,
+                         minGSSize = 1)
   
   ego_BP <- as.data.frame(info_go_BP@result)
   ego_CC <- as.data.frame(info_go_CC@result)
@@ -98,7 +109,6 @@ GOKEGG <- function(file,pSet)  {
   levels(ego_three$onco) <- c("BP","CC","MF")
   
   ##plot bar
-  library(ggplot2)
   lable_name <- ego_three$onco[!duplicated(ego_three$onco)]
   if (exists("p")) rm(p)
   
@@ -119,8 +129,15 @@ GOKEGG <- function(file,pSet)  {
     # dev.off()
     filename  = paste(groups,"_GO_barplot.pdf",sep="")
     ggsave(file=paste(path3,filename,sep="/"),p, width=10, height=10, units="in")
+
+    print("------------------------------")
+    print(pSet)
+    print("GO_plot OK!")
+    print("------------------------------")
+
   }
   
+
   
   ########################################################
   #####################8.KEGG-plot########################
@@ -134,14 +151,9 @@ GOKEGG <- function(file,pSet)  {
     
     }else 
     id_kegg <- gene_id
-    
-  #kegg
-  kk <- enrichKEGG(gene = id_kegg, organism = kegg_org, keyType = "kegg", pvalueCutoff = pSet)
-  kk_df <- as.data.frame(kk) %>%
-    dplyr::select(-ID)
   
   #kegg
-  kk <- enrichKEGG(gene = id_kegg, organism = kegg_org, keyType = "kegg", pvalueCutoff = pSet)
+  kk <- enrichKEGG(gene = id_kegg, organism = kegg_org, keyType = "kegg", pvalueCutoff = pSet,qvalueCutoff = pSet,minGSSize = 2)
   kk_df <- as.data.frame(kk) %>%
     dplyr::select(-ID)
   filename=paste(groups,"_KEGG_out.txt",sep="")
@@ -149,16 +161,21 @@ GOKEGG <- function(file,pSet)  {
   
   ##plot
   if (exists("p")) rm(p)
-  p = dotplot(kk) + guides(
-    color = guide_colorbar(order = 1),
-    fill = guide_legend(order = 0))
-  filename=paste(groups,"_KEGG_dotplot.pdf",sep="")
-  ggsave(file=paste(path3,filename,sep="/"),p, width=10, height=10, units="in")
+  if (dim(kk)[1] != 0) {
+    p = dotplot(kk) + guides(
+      color = guide_colorbar(order = 1),
+      fill = guide_legend(order = 0))
+    filename=paste(groups,"_KEGG_dotplot.pdf",sep="")
+    ggsave(file=paste(path3,filename,sep="/"),p, width=10, height=10, units="in")
+    
+    print("------------------------------")
+    print(pSet)
+    print("KEGG_plot OK!")
+    print("------------------------------")
+  }
 
 
-  cmd <- sprintf("bash /data1/script/deseq2+GO+KEGG/Rpipe/ID_conv0.sh %s %s" ,path3,filename_tab)
-  system(cmd,intern=TRUE)
-
+  if (exists("filename_tab")) system(sprintf("bash /data1/script/deseq2+GO+KEGG/Rpipe/ID_conv0.sh %s %s" ,path3,filename_tab),intern=TRUE)
 }
 
 
@@ -171,9 +188,23 @@ db <- hub[[dbname]]
 path1 = paste(output_path,"3.DiffExprGene",sep="")
 sigfiles = list.files(path1,pattern="sig_genes_exprData.txt")
 
-sapply(sigfiles,GOKEGG,pSet=1)
+sapply(sigfiles,GOKEGG,pSet=0.5)
+
+print("------------------------------")
+print("########pSet 0.5 OK!##########")
+print("------------------------------")
+
 sapply(sigfiles,GOKEGG,pSet=0.1)
+
+print("------------------------------")
+print("########pSet 0.1 OK!##########")
+print("------------------------------")
+
 sapply(sigfiles,GOKEGG,pSet=0.05)
+
+print("------------------------------")
+print("########pSet 0.05 OK!#########")
+print("------------------------------")
 
 
 
