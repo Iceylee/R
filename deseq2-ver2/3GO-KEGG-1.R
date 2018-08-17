@@ -25,24 +25,21 @@ suppressMessages(library(tidyr))
 suppressMessages(library(ggplot2))
 
 GOKEGG <- function(file,pSet)  {
-  path3 = paste(output_path,"4.GO_KEGG_Enrichment/",pSet,"/",sep="")
+  path3 = paste(output_path,"4.GO_KEGG/",pSet,"/",sep="")
   dir.create(path3,showWarnings = FALSE,recursive=T)
   
   sig_path = paste(path1,"/",file,sep="")
-  gene_list <- read.table(sig_path,row.names=1,sep = '\t',header = T,stringsAsFactors=F)
-  gene_list$geneID <- rownames(gene_list)
+  gene_list <- read.csv(sig_path, sep = '\t',header = T,stringsAsFactors=F)
 
-  # if first col type: geneID(geneSymbol)
-  # extract symbol in parentesis
-  if (grepl("\\(",gene_list$geneID[1])){
-    gene_list$geneID <- sapply(gene_list$geneID,function(string){regmatches(string, gregexpr("(?<=\\().*?(?=\\))", string, perl=T))[[1]]})
+  #if first col type: geneID(geneSymbol)
+  #extract symbol in parentesis
+  if (grepl("\\(",gene_list[2,1])){
+    gene_list[,1] <- sapply(gene_list[,1],function(string){regmatches(string, gregexpr("(?<=\\().*?(?=\\))", string, perl=T))[[1]]})
   }
 
   groups = sapply(strsplit(file, "_sig"), "[", 1)
     
-  gene_id = as.character(gene_list$geneID)
-
-  print(gene_id[1])
+  gene_id = as.character(gene_list[,1])
   
   ########################################################
   #####################6.GO-result########################
@@ -55,38 +52,36 @@ GOKEGG <- function(file,pSet)  {
                          keyType = GO_KEY, 
                          ont = "BP", 
                          pAdjustMethod = "BH", 
-                         pvalueCutoff = 1, 
-                         qvalueCutoff = 1,
+                         pvalueCutoff = pSet, 
+                         qvalueCutoff = pSet,
                          minGSSize = 1)
   info_go_CC <- enrichGO(gene = gene_id, 
                          OrgDb = db, 
                          keyType = GO_KEY, 
                          ont = "CC", 
                          pAdjustMethod = "BH", 
-                         pvalueCutoff = 1, 
-                         qvalueCutoff = 1,
+                         pvalueCutoff = pSet, 
+                         qvalueCutoff = pSet,
                          minGSSize = 1)
   info_go_MF <- enrichGO(gene = gene_id, 
                          OrgDb = db, 
                          keyType = GO_KEY, 
                          ont = "MF", 
                          pAdjustMethod = "BH", 
-                         pvalueCutoff = 1, 
-                         qvalueCutoff = 1,
+                         pvalueCutoff = pSet, 
+                         qvalueCutoff = pSet,
                          minGSSize = 1)
-
-  #filter pvalue by pSet
-  ego_BP <- as.data.frame(info_go_BP@result) %>% filter(pvalue <= pSet)
-  ego_CC <- as.data.frame(info_go_CC@result) %>% filter(pvalue <= pSet)
-  ego_MF <- as.data.frame(info_go_MF@result) %>% filter(pvalue <= pSet)
+  
+  ego_BP <- as.data.frame(info_go_BP@result)
+  ego_CC <- as.data.frame(info_go_CC@result)
+  ego_MF <- as.data.frame(info_go_MF@result)
   
   fileBP = paste(groups,"_GO_BP_out.txt",sep="")
   fileCC = paste(groups,"_GO_CC_out.txt",sep="")
   fileMF = paste(groups,"_GO_MF_out.txt",sep="")
-
-  write.table(ego_BP, file=paste(path3,fileBP,sep="/"),quote=F,row.names = F,sep = "\t")
-  write.table(ego_CC, file=paste(path3,fileCC,sep="/"),quote=F,row.names = F,sep = "\t")
-  write.table(ego_MF, file=paste(path3,fileMF,sep="/"),quote=F,row.names = F,sep = "\t")
+  write.table(as.data.frame(info_go_BP@result), file=paste(path3,fileBP,sep="/"),quote=F,row.names = F,sep = "\t")
+  write.table(as.data.frame(info_go_CC@result), file=paste(path3,fileCC,sep="/"),quote=F,row.names = F,sep = "\t")
+  write.table(as.data.frame(info_go_MF@result), file=paste(path3,fileMF,sep="/"),quote=F,row.names = F,sep = "\t")
   
   ########################################################
   #####################7.GO-plot##########################
@@ -99,8 +94,7 @@ GOKEGG <- function(file,pSet)  {
   ego_CC_df <- ego_CC %>%
     mutate(onco="Cellular component")
   ego_three <- rbind(ego_BP_df, ego_CC_df, ego_MF_df)
-
-
+  
   #top 15 select
   ego_three <- ego_three %>%
     arrange_(~ pvalue) %>%
@@ -123,13 +117,16 @@ GOKEGG <- function(file,pSet)  {
       geom_bar(stat = "identity", aes(fill = onco), alpha = 1) +
       facet_grid(onco ~ ., scales = "free", space = "free",margins = F) +
       coord_flip()  +
+      #scale_y_continuous(limits = c(0, 70))+
       scale_fill_discrete(name = "Ontology", labels = lable_name) +
       theme_light() +
       theme(axis.text = element_text(size = 9), legend.text = element_text(size = 8)) +
       labs(y = "Number of Genes", x = "Term")+
       theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
       scale_y_continuous(labels = function (Count) floor(Count))
-
+    # pdf(file=paste(groups,"_GO_barplot.pdf",sep=""))
+    # p
+    # dev.off()
     filename  = paste(groups,"_GO_barplot.pdf",sep="")
     ggsave(file=paste(path3,filename,sep="/"),p, width=10, height=10, units="in")
 
@@ -156,7 +153,7 @@ GOKEGG <- function(file,pSet)  {
     id_kegg <- gene_id
   
   #kegg
-  kk <- enrichKEGG(gene = id_kegg, organism = kegg_org, keyType = "kegg", pvalueCutoff = pSet,qvalueCutoff = 1,minGSSize = 2)
+  kk <- enrichKEGG(gene = id_kegg, organism = kegg_org, keyType = "kegg", pvalueCutoff = pSet,qvalueCutoff = pSet,minGSSize = 2)
   kk_df <- as.data.frame(kk) %>%
     dplyr::select(-ID)
   filename=paste(groups,"_KEGG_out.txt",sep="")
@@ -191,10 +188,16 @@ db <- hub[[dbname]]
 path1 = paste(output_path,"3.DiffExprGene",sep="")
 sigfiles = list.files(path1,pattern="sig_genes_exprData.txt")
 
-sapply(sigfiles,GOKEGG,pSet=1)
+sapply(sigfiles,GOKEGG,pSet=0.5)
 
 print("------------------------------")
-print("########pSet 1 OK!##########")
+print("########pSet 0.5 OK!##########")
+print("------------------------------")
+
+sapply(sigfiles,GOKEGG,pSet=0.1)
+
+print("------------------------------")
+print("########pSet 0.1 OK!##########")
 print("------------------------------")
 
 sapply(sigfiles,GOKEGG,pSet=0.05)

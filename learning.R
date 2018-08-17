@@ -1,3 +1,7 @@
+#df 提取一列但保留rownames
+ A[1,,drop=FALSE]
+
+
 #string 传为object
 Plot_Rank = "Phylum"
 arrange(df,!!sym(Plot_Rank))

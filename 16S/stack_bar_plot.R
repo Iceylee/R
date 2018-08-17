@@ -25,18 +25,23 @@ physeq2 <- physeq %>%
 # rank的每一类针对丰度求和，然后取前20的rank 类别
 mainAbundance <- physeq2 %>%
   group_by(!!sym(Plot_Rank)) %>% #将string转成object
-  summarise(sum_abun = sum(Abundance)) %>%
-  top_n(n=20,wt=sum_abun)
+  summarise(max_abun = max(Abundance)) %>%
+  top_n(n=20,wt=max_abun) %>%
+  arrange(max_abun)
 
 #根据上表的前20类别，来filter得到仅含前20类别的表格
 physeq3 <- filter(physeq2, !!sym(Plot_Rank) %in% mainAbundance[[Plot_Rank]])
 
+#mainAbundance top20排序
+physeq3[[Plot_Rank]] <- reorder.factor(physeq3[[Plot_Rank]], new.order=mainAbundance[[Plot_Rank]])
+physeq3 = physeq3 %>%
+  arrange(desc(!!sym(Plot_Rank))) 
+
 # Set colors for plotting
 plot_colors <- c(
-  "#CBD588", "#5F7FC7", "orange","#DA5724", "#508578", "#CD9BCD",
-  "#AD6F3B", "#673770","#D14285", "#652926", "#C84248", 
-  "#8569D5", "#5E738F","#D1A33D", "#8A7C64", "#599861"
-,"#c8c8c8","#969696","#505050","#010101")
+    "#c8c8c8","#969696","#505050","#010101","#8569D5", "#5E738F","#D1A33D", "#8A7C64", "#599861"
+  ,"#CBD588", "#5F7FC7", "orange","#DA5724", "#508578", "#CD9BCD",
+  "#AD6F3B", "#673770","#D14285", "#652926", "#C84248")
 
 plot_colors2 <- c("darkblue", "darkgoldenrod1", "darkseagreen", "darkorchid", "darkolivegreen1", "lightskyblue", "darkgreen", "deeppink", "khaki2", "firebrick", "brown1", "darkorange1", "cyan1", "royalblue4", "darksalmon", "darkblue",
                   "royalblue4", "dodgerblue3", "steelblue1", "lightskyblue", "darkseagreen", "darkgoldenrod1", "darkseagreen", "darkorchid", "darkolivegreen1", "brown1", "darkorange1", "cyan1", "darkgrey")
