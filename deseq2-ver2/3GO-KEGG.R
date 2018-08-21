@@ -156,20 +156,34 @@ GOKEGG <- function(file,pSet)  {
     id_kegg <- gene_id
   
   #kegg
-  kk <- enrichKEGG(gene = id_kegg, organism = kegg_org, keyType = "kegg", pvalueCutoff = pSet,qvalueCutoff = 1,minGSSize = 2)
+  kk <- enrichKEGG(gene = id_kegg, organism = kegg_org, keyType = "kegg", pvalueCutoff = 1,qvalueCutoff = 1,minGSSize = 2)
   kk_df <- as.data.frame(kk) %>%
-    dplyr::select(-ID)
-  filename=paste(groups,"_KEGG_out.txt",sep="")
-  write.table(kk_df, file=paste(path3,filename,sep="/"),quote = F,sep = "\t")
+    #dplyr::select(-ID) %>%
+    filter(pvalue <= pSet) %>%
+    arrange(pvalue)%>%
+    do(head(., n = 15)) %>%
+    arrange(GeneRatio)
+
+   #gene sum 
+  tep_num1 = kk_df$GeneRatio[1]
+  tep_num2 = strsplit(tep_num1 , "/")
+  gene_num = as.numeric(tep_num2[[1]][2])
+
+  kk_df <- kk_df %>% transform(GeneRatio = Count / gene_num )
+
+  filename=paste(path3,groups,"_KEGG_Enrichment.txt",sep="")
+  write.table(kk_df, file=filename,quote = F,sep = "\t",row.names = FALSE)
   
   ##plot
   if (exists("p")) rm(p)
   if (dim(kk)[1] != 0) {
-    p = dotplot(kk) + guides(
-      color = guide_colorbar(order = 1),
-      fill = guide_legend(order = 0))
+    pp <- ggplot(kk_df, aes(x = GeneRatio, y = reorder(Description, GeneRatio))) + geom_point(aes(size=Count, color=pvalue)) + 
+      scale_size("Count") + 
+      scale_color_continuous(low="red", high="grey") + 
+      theme_light() + 
+      labs(x="Gene Ratio", y = "Term") 
     filename=paste(groups,"_KEGG_dotplot.pdf",sep="")
-    ggsave(file=paste(path3,filename,sep="/"),p, width=10, height=10, units="in")
+    ggsave(file=paste(path3,filename,sep="/"),pp, width=10, height=10, units="in")
     
     print("------------------------------")
     print(pSet)
