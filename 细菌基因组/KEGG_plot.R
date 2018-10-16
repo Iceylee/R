@@ -1,7 +1,23 @@
+#!/usr/bin/env Rscript
+
+args<-commandArgs(T)
+
+if (length(args)!=2) {
+  print ("2 arguments must be supplied:")
+  print ("countFile plotPrefix")
+  print ("kegg_count.out ./bar")
+  stop(call.=FALSE)
+} 
+
+countFile <- args[1] 
+plotPrefix <- args[2] 
+
+
 
 library(dplyr)
+library(ggplot2)
 
-df <- read.csv("kegg.count", sep = '\t',header = F)
+df <- read.csv(countFile, sep = '\t',header = F)
 colnames(df) <- c("Class","Description","Count")
 
 df <- df %>%
@@ -9,9 +25,8 @@ df <- df %>%
   arrange(Class,Count)
 
 df$Description<- factor(df$Description, order=TRUE, levels=df$Description)
-df$onco<- factor(df$onco, order=T)
-###
-library(ggplot2)
+df$Class<- factor(df$Class, order=T)
+
 p <- ggplot(df, aes(y = Count, x = Description)) +
   geom_bar(stat = "identity", aes(fill = Class), alpha = 1) +
   scale_fill_discrete(name = "Ontology") +
@@ -23,8 +38,9 @@ p <- ggplot(df, aes(y = Count, x = Description)) +
 p <- p +scale_fill_brewer(palette = "Set1") +
   theme(axis.text.x = element_text(angle = 70, hjust = 1, vjust = 1))
 
-ggsave("KEGG_barplot.pdf",p, width=10, height=7, units="in")
 
+ggsave(file=paste(plotPrefix,".pdf",sep=""),p, width=10, height=7, units="in")
 
+ggsave(file=paste(plotPrefix,".png",sep=""),p, width=10, height=7, units="in")
 
 

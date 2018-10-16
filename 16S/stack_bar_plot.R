@@ -1,6 +1,7 @@
 library("phyloseq")
 library("ggplot2")
 library("dplyr")
+require(gdata)
 theme_set(theme_light())
 
 data("GlobalPatterns")

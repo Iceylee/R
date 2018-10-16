@@ -5,6 +5,7 @@ library("dplyr")
 library(cowplot)
 library(dendextend)
 library(ggdendro)
+require(gdata)
 
 theme_set(theme_light())
 

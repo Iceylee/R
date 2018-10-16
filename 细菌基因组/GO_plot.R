@@ -1,9 +1,28 @@
+#!/usr/bin/env Rscript
 
-library(dplyr)
+args<-commandArgs(T)
+
+if (length(args)!=2) {
+  print ("2 arguments must be supplied:")
+  print ("countFile plotPrefix")
+  print ("go_count.out ./bar")
+  stop(call.=FALSE)
+} 
 
 
-df <- read.csv("go_count.out", sep = '\t',header = F)
+countFile <- args[1] 
+plotPrefix <- args[2] 
+
+
+# library
+library(dplyr,quietly=T, warn.conflicts=F)
+library(ggplot2,quietly=T, warn.conflicts=F)
+options(warn=-1)
+
+# load data
+df <- read.csv(countFile, sep = '\t',header = F)
 colnames(df) <- c("GO","Count","onco","Description")
+
 
 df_CC <- filter(df,onco == "cellular_component") %>%
   arrange(desc(Count))
@@ -35,12 +54,14 @@ ego_three<- ego_three %>%
   arrange(onco,Count)
 
 ego_three$Description<- factor(ego_three$Description, order=TRUE, levels=ego_three$Description)
-#ego_three$onco<- factor(ego_three$onco, order=TRUE, levels=c("Molecular function","Cellular component","Biological process"))
+
 ego_three$onco<- factor(ego_three$onco, order=TRUE)
 levels(ego_three$onco) <- c("BP","CC","MF")
 
 lable_name <- ego_three$onco[!duplicated(ego_three$onco)]
-###
+
+# plot
+
 p <- ggplot(ego_three, aes(y = Count, x = Description)) +
   geom_bar(stat = "identity", aes(fill = onco), alpha = 1) +
   facet_grid(onco ~ ., scales = "free", space = "free",margins = F) +
@@ -52,9 +73,9 @@ p <- ggplot(ego_three, aes(y = Count, x = Description)) +
   labs(y = "Number of Genes", x = "Term")+
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) 
 
-pdf(file="GO_barplot.pdf")
-p
-dev.off()
+ggsave(file=paste(plotPrefix,".pdf",sep=""),p, width=10, height=10, units="in")
+
+ggsave(file=paste(plotPrefix,".png",sep=""),p, width=10, height=10, units="in")
 
 
 

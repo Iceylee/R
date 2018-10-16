@@ -7,7 +7,7 @@ if [  -f $1/$2 ]; then
 	file=$1/$2
 	filename=${file/_ID_type.tab/}
 	tabFile=${filename}_ID_type.tab
-	keggFile=${filename}_KEGG_out.txt
+	keggFile=${filename}_KEGG_Enrichment.txt
 	awk '
 	BEGIN{FS=OFS="\t"}
 	NR==FNR{a[$2]=$1;next}

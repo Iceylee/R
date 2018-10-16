@@ -52,7 +52,8 @@ write.table(DE_sig, file= paste(path2,filename,sep="/"), sep="\t",  row.name=TRU
 ########################################################
 filename = paste(groups,"_MA_plot.pdf",sep="")
 pdf(file = paste(path2,filename,sep="/"))
-detags <- rownames(y)[as.logical(de)];
+detags <- rownames(y)[as.logical(DE$significant)]
+#detags <- rownames(y)[as.logical(de)];
 plotSmear(et, de.tags=detags)
 abline(h=c(-1, 1), col="blue");
 dev.off()
@@ -85,4 +86,5 @@ p2 <- ggplot(sig_df, aes(x = log2FoldChange, y = -log10(padj),col = color)) +
 
 filename = paste(groups,"_volcano_plot.pdf",sep="")
 ggsave(file=paste(path2,filename,sep="/"),p2, width=6, height=6, units="in")
+
 

@@ -3,38 +3,41 @@
 args<-commandArgs(T)
 
 # test if there is at least one argument: if not, return an error
-if (length(args)!=5) {
-  print ("5 arguments must be supplied:")
-  print ("GeneKeyType pSet ModelOrNot KEGGDir SigFileDir")
-  print ("ENSEMBL 0.05 FALSE ./nonModel/4.GO_KEGG_Enrichment/ ./nonModel/3.DiffExprGene/")
+if (length(args)!=4) {
+  print ("4 arguments must be supplied:")
+  print ("SigFileDir KEGGDir GeneKeyType ModelOrNot")
+  print ("./nonModel/3.DiffExprGene/ ./nonModel/4.GO_KEGG_Enrichment/0.05/ ENSEMBL FALSE")
   stop(call.=FALSE)
 } 
 
 
 ###Arguments
-GENE_KEY= args[1] #"ENSEMBL" 
-PSET = args[2] #0.05
-MODEL = args[3] #FALSE
-KEGG_DIR = args[4] #"./nonModel/4.GO_KEGG_Enrichment/"
-SIG_PATH = args[5] #"./nonModel/3.DiffExprGene/"
+SIG_PATH = args[1] #"./nonModel/3.DiffExprGene/"
+KEGG_DIR = args[2] #"./nonModel/4.GO_KEGG_Enrichment/0.05/"
+GENE_KEY= args[3] #"ENSEMBL" 
+MODEL = args[4] #FALSE
+
+
 
 suppressMessages(library(pathview))
 #############################################
 ######For Model Animal(eg.Human)#############
 #############################################
-PathViewModel <- function(sigfile,pSet){  
+PathViewModel <- function(sigfile){  
+  workdir=getwd()
+
   #folddir
   groups = sapply(strsplit(sigfile, "_sig"), "[", 1)
-  pathway_path = paste(KEGG_DIR,"/KEGG_Pathway","/",groups,"/",sep="")
+  pathway_path = paste(KEGG_DIR,"/",groups,"_Pathway/",sep="")
   
   #check if exists，exists then delete
-  if dir.exists(pathway_path) {unlink(pathway_path,recursive=TRUE}
+  if (dir.exists(pathway_path)) {unlink(pathway_path,recursive=TRUE)}
   dir.create(pathway_path,showWarnings = FALSE,recursive=T)
   
   #read in data
   Gene <- read.table(paste(SIG_PATH,sigfile,sep="/"), sep="\t", header = T, row.names = 1)        
-  path_info = paste(KEGG_DIR,pSet,"/",groups,"_KEGG_Enrichment.txt",sep="")
-  Path <- read.table(path_info, header = T, row.names = 1, sep="\t")
+  path_info = paste(KEGG_DIR,"/",groups,"_KEGG_Enrichment.tmp.txt",sep="")
+  Path <- read.csv(path_info, header = T, row.names = 1, sep="\t")
   
   #Gene expr data
   Gene$geneID <- rownames(Gene)
@@ -58,25 +61,33 @@ PathViewModel <- function(sigfile,pSet){
   }
   
   sapply(KEGG_path_id, cc) 
-  setwd("../../../")
+  setwd(workdir)
   
 }
 
 #############################################
 ######For Non-Model Animal##################
 #############################################
-PathViewNoModel <- function(sigfile,pSet){  
+PathViewNoModel <- function(sigfile){  
+  workdir=getwd()
   #folddir
   groups = sapply(strsplit(sigfile, "_sig"), "[", 1)
-  pathway_path = paste(KEGG_DIR,"/KEGG_Pathway","/",groups,"/",sep="")
+  pathway_path = paste(KEGG_DIR,"/",groups,"_Pathway/",sep="")
+
+  #check if exists，exists then delete
+  if (dir.exists(pathway_path)) {unlink(pathway_path,recursive=TRUE)}
   dir.create(pathway_path,showWarnings = FALSE,recursive=T)
   
   #read in data
-  Gene <- read.table(paste(SIG_PATH,sigfile,sep="/"), sep="\t", header = T)        
-  path_info = paste(KEGG_DIR,pSet,"/",groups,"_KEGG_Enrichment.txt",sep="")
-  Path <- read.table(path_info, header = T, row.names = 1, sep="\t")
+  Gene <- read.table(paste(SIG_PATH,sigfile,sep="/"), sep="\t", header = F,stringsAsFactors=F)        
+  path_info = paste(KEGG_DIR,"/",groups,"_KEGG_Enrichment.tmp.txt",sep="")
+  Path <- read.csv(path_info, header = T, row.names = 1, sep="\t")
   
   #colnames
+  #如果第一行是行名(某列为log2FoldChange)则去掉
+  if ("log2FoldChange" %in% Gene[1,]) {
+    Gene <- Gene[-1,]
+  }
   colnames(Gene)[1:4] = c("koID","geneID","baseMean","log2FoldChange")
   
   #去除重复
@@ -87,14 +98,18 @@ PathViewNoModel <- function(sigfile,pSet){
   #KEGG path id
   KEGG_path_id <- (rownames(Path))
   setwd(pathway_path)
+  num = 0
   cc <- function(KEGG_path_id){
+    if (num >= 20) {return(NULL)}
     pv.out <- pathview(gene.data = Gene4Path[,1,drop=FALSE], pathway.id = KEGG_path_id, 
                        species = "ko", kegg.native = TRUE,
                        gene.idtype = GENE_KEY)
+    if (class(pv.out)=="list") {num <<- num + 1}
+
   }
   
   sapply(KEGG_path_id, cc) 
-  setwd("../../../")
+  setwd(workdir)
   
 }
 
@@ -106,10 +121,10 @@ PathViewNoModel <- function(sigfile,pSet){
 
 if (MODEL == TRUE) {
   sigfiles = list.files(SIG_PATH,pattern="sig_genes_exprData.txt")
-  sapply(sigfiles, PathViewModel, pSet=PSET)
+  sapply(sigfiles, PathViewModel)
 }
 
 if (MODEL == FALSE) {
-  sigfiles = list.files(SIG_PATH,pattern="sig_pathview.txt")
-  sapply(sigfiles, PathViewNoModel, pSet=PSET)
+  sigfiles = list.files(SIG_PATH,pattern="sig_genes_exprData_pathview.txt")
+  sapply(sigfiles, PathViewNoModel)
 }

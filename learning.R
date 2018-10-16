@@ -1,3 +1,28 @@
+#根据向量筛选data frametop_dest <- flights %>%
+top_dest <- flights %>%
+  count(dest, sort = TRUE) %>%
+  head(10)
+
+flights %>% 
+  filter(dest %in% top_dest$dest)
+
+#color & legend 
+ggplot(mtcars) + 
+  geom_bar(aes(factor(hp), fill=factor(hp))) + 
+  scale_fill_manual(values = getPalette(22),
+                    guide = guide_legend(nrow=2)) +
+  theme(legend.position="bottom")
+
+#根据vector来取特定rows
+dt[dt$fct %in% vc,]
+
+
+#按照tvhours的大小对relig的levels进行排序。这样画图的label就是这样的顺序
+relig_summary %>%
+  mutate(relig = fct_reorder(relig, tvhours))
+ggplot(relig_summary, aes(tvhours, relig)) + geom_point()
+
+
 #df 提取一列但保留rownames
  A[1,,drop=FALSE]
 
@@ -7,6 +32,9 @@ Plot_Rank = "Phylum"
 arrange(df,!!sym(Plot_Rank))
 #等同于
 arrange(df,Phylum)
+
+##
+df[[Plot_Rank]]
 
 #批量读入文件 
 a = list.files("./rawData")                                                       
@@ -35,7 +63,7 @@ sapply(sigfiles,GOKEGG,pSet=1)
 system("ls")
 
 #substring
-string = c("G1:E001", "G2:E002", G3:E003)
+string = c("G1:E001", "G2:E002", "G3:E003")
 
 1) sub
 

@@ -79,58 +79,57 @@ GOKEGG <- function(file,pSet)  {
   ego_BP <- as.data.frame(info_go_BP@result) %>% filter(pvalue <= pSet)
   ego_CC <- as.data.frame(info_go_CC@result) %>% filter(pvalue <= pSet)
   ego_MF <- as.data.frame(info_go_MF@result) %>% filter(pvalue <= pSet)
-  
-  fileBP = paste(groups,"_GO_BP_out.txt",sep="")
-  fileCC = paste(groups,"_GO_CC_out.txt",sep="")
-  fileMF = paste(groups,"_GO_MF_out.txt",sep="")
 
-  write.table(ego_BP, file=paste(path3,fileBP,sep="/"),quote=F,row.names = F,sep = "\t")
-  write.table(ego_CC, file=paste(path3,fileCC,sep="/"),quote=F,row.names = F,sep = "\t")
-  write.table(ego_MF, file=paste(path3,fileMF,sep="/"),quote=F,row.names = F,sep = "\t")
-  
-  ########################################################
-  #####################7.GO-plot##########################
-  ########################################################
-  
   ego_MF_df <- ego_MF %>%
-    mutate(onco="Molecular function")
+    mutate(Classification="Molecular function")
   ego_BP_df <- ego_BP %>%
-    mutate(onco="Biological process")
+    mutate(Classification="Biological process")
   ego_CC_df <- ego_CC %>%
-    mutate(onco="Cellular component")
+    mutate(Classification="Cellular component")
   ego_three <- rbind(ego_BP_df, ego_CC_df, ego_MF_df)
 
+  ego_all_file = paste(groups,"_GO_Enrichment.txt",sep="")
+  write.table(ego_three, file=paste(path3,ego_all_file,sep="/"),quote=F,row.names = F,sep = "\t")
+
+########################################################
+#####################7.GO-plot##########################
+########################################################
 
   #top 15 select
   ego_three <- ego_three %>%
     arrange_(~ pvalue) %>%
-    group_by_(~ onco) %>%
+    group_by_(~ Classification) %>%
     do(head(., n = 15)) %>%
-    arrange(onco,Count)
+    arrange(Classification,Count)
   
-  ego_three$Description<- sapply(as.character(ego_three$Description),function(string) {ifelse (nchar(string)>45, paste(substr(string,1,45),"...",sep=""),string)})
+#  ego_three$Description<- sapply(as.character(ego_three$Description),function(string) {ifelse (nchar(string)>45, paste(substr(string,1,45),"...",sep=""),string)})
   
   ego_three$Description<- factor(ego_three$Description, order=TRUE, levels=ego_three$Description)
-  ego_three$onco<- factor(ego_three$onco, order=TRUE)
-  levels(ego_three$onco) <- c("BP","CC","MF")
+  ego_three$Classification<- factor(ego_three$Classification, order=TRUE)
+  levels(ego_three$Classification) <- c("BP","CC","MF")
   
   ##plot bar
-  lable_name <- ego_three$onco[!duplicated(ego_three$onco)]
+  lable_name <- ego_three$Classification[!duplicated(ego_three$Classification)]
   if (exists("p")) rm(p)
   
   if (dim(ego_three)[1] != 0) {
     p <- ggplot(ego_three, aes(y = Count, x = Description)) +
-      geom_bar(stat = "identity", aes(fill = onco), alpha = 1) +
-      facet_grid(onco ~ ., scales = "free", space = "free",margins = F) +
+      geom_bar(stat = "identity", aes(fill = Classification), alpha = 1) +
+      facet_grid(Classification ~ ., scales = "free", space = "free",margins = F) +
       coord_flip()  +
       scale_fill_discrete(name = "Ontology", labels = lable_name) +
       theme_light() +
       theme(axis.text = element_text(size = 9), legend.text = element_text(size = 8)) +
       labs(y = "Number of Genes", x = "Term")+
       theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
-      scale_y_continuous(labels = function (Count) floor(Count))
+      scale_y_continuous(labels = function (Count) floor(Count)) +
+      labs(title = paste(groups," GO barplot",sep=""))+
+      theme(plot.title = element_text(hjust = 0.5))
 
     filename  = paste(groups,"_GO_barplot.pdf",sep="")
+    ggsave(file=paste(path3,filename,sep="/"),p, width=10, height=10, units="in")
+    
+    filename = paste(groups,"_GO_barplot.png",sep="")
     ggsave(file=paste(path3,filename,sep="/"),p, width=10, height=10, units="in")
 
     print("------------------------------")
@@ -160,9 +159,7 @@ GOKEGG <- function(file,pSet)  {
   kk_df <- as.data.frame(kk) %>%
     #dplyr::select(-ID) %>%
     filter(pvalue <= pSet) %>%
-    arrange(pvalue)%>%
-    do(head(., n = 15)) %>%
-    arrange(GeneRatio)
+    arrange(pvalue)
 
    #gene sum 
   tep_num1 = kk_df$GeneRatio[1]
@@ -173,17 +170,28 @@ GOKEGG <- function(file,pSet)  {
 
   filename=paste(path3,groups,"_KEGG_Enrichment.txt",sep="")
   write.table(kk_df, file=filename,quote = F,sep = "\t",row.names = FALSE)
-  
-  ##plot
+
+  #plot（取p值前15）
+  kk_df <- kk_df %>%
+    do(head(., n = 15)) %>%
+    arrange(GeneRatio)
+
   if (exists("p")) rm(p)
   if (dim(kk)[1] != 0) {
     pp <- ggplot(kk_df, aes(x = GeneRatio, y = reorder(Description, GeneRatio))) + geom_point(aes(size=Count, color=pvalue)) + 
       scale_size("Count") + 
       scale_color_continuous(low="red", high="grey") + 
       theme_light() + 
-      labs(x="Gene Ratio", y = "Term") 
+      labs(x="Gene Ratio", y = "Term")+
+      labs(title = paste(groups," KEGG dotplot",sep=""))+
+      theme(plot.title = element_text(hjust = 0.5))
+
     filename=paste(groups,"_KEGG_dotplot.pdf",sep="")
     ggsave(file=paste(path3,filename,sep="/"),pp, width=10, height=10, units="in")
+    
+    filename=paste(groups,"_KEGG_dotplot.png",sep="")
+    ggsave(file=paste(path3,filename,sep="/"),pp, width=10, height=10, units="in")
+
     
     print("------------------------------")
     print(pSet)
