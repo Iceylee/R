@@ -1,3 +1,20 @@
+#jupyter R输出图片的大小 设置
+library(repr)
+options(repr.plot.width=12, repr.plot.height=6)
+
+
+#ggplot plot data
+loess_data <- ggplot_build(p3)$data
+dot <- loess_data[[1]]
+black_curve <- loess_data[[2]]
+green_curve <- loess_data[[3]]
+
+#sliding window
+SNP_index3  <- SNP_index3 %>%
+  group_by(chrom)%>%
+  mutate(avg = roll_mean(SNP_Index, step, na.rm=TRUE, align="left", fill = NA))%>%
+  ungroup()
+
 #根据向量筛选data frametop_dest <- flights %>%
 top_dest <- flights %>%
   count(dest, sort = TRUE) %>%
